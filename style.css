@@ -260,7 +260,7 @@ button {
 /* 修正隔線跑掉：改用真正的 CSS Grid + 1px 黑色 gap 當格線 */
 .trace-module {
   width: calc(var(--big-cell-mm) + var(--small-cell-mm) + var(--small-cell-mm) + (var(--grid-line) * 4));
-  height: calc(var(--big-cell-mm) + (var(--grid-line) * 2));
+  height: calc(var(--big-cell-mm) + (var(--grid-line) * 3));
   display: grid;
   grid-template-columns: var(--big-cell-mm) var(--small-cell-mm) var(--small-cell-mm);
   grid-template-rows: var(--small-cell-mm) var(--small-cell-mm);
