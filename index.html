@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>描紅練字頁產生器</title>
   <meta
     name="description"
@@ -15,21 +15,12 @@
     rel="icon"
     type="image/svg+xml"
     href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%232563eb'/%3E%3Crect x='12' y='12' width='40' height='40' rx='4' fill='white'/%3E%3Cpath d='M32 12v40M12 32h40' stroke='%232563eb' stroke-width='2' opacity='0.45'/%3E%3C/svg%3E"
-  >
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-  <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Huninn&display=swap"
-  >
-  <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap"
-  >
-
-  <link rel="stylesheet" href="./style.css">
+ /1.4.1/html2canvas.min.js"
+    defer
+ ttps://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+    defer
+  ></script>
+  <script src="./script.js" defer></script>
 </head>
 <body>
   <div class="app-shell">
@@ -184,15 +175,5 @@
       這個工具需要啟用 JavaScript 才能正常使用。
     </div>
   </noscript>
-
-  <script
-    src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
-    defer
-  ></script>
-  <script
-    src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
-    defer
-  ></script>
-  <script src="./script.js" defer></script>
 </body>
 </html>
