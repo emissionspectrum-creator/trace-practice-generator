@@ -257,66 +257,61 @@ button {
   overflow: hidden;
 }
 
+/* 修正隔線跑掉：改用真正的 CSS Grid + 1px 黑色 gap 當格線 */
 .trace-module {
-  width: calc(var(--big-cell-mm) * 2);
-  height: var(--big-cell-mm);
-  position: relative;
+  width: calc(var(--big-cell-mm) + var(--small-cell-mm) + var(--small-cell-mm) + (var(--grid-line) * 4));
+  height: calc(var(--big-cell-mm) + (var(--grid-line) * 2));
+  display: grid;
+  grid-template-columns: var(--big-cell-mm) var(--small-cell-mm) var(--small-cell-mm);
+  grid-template-rows: var(--small-cell-mm) var(--small-cell-mm);
+  gap: var(--grid-line);
+  padding: var(--grid-line);
+  background: #000000;
   flex: 0 0 auto;
   margin-right: calc(var(--grid-line) * -1);
   margin-bottom: calc(var(--grid-line) * -1);
-  background:
-    linear-gradient(#000000, #000000) 0 0 / 100% var(--grid-line) no-repeat,
-    linear-gradient(#000000, #000000) 0 100% / 100% var(--grid-line) no-repeat,
-    linear-gradient(#000000, #000000) 0 0 / var(--grid-line) 100% no-repeat,
-    linear-gradient(#000000, #000000) 100% 0 / var(--grid-line) 100% no-repeat,
-    linear-gradient(#000000, #000000) 50% 0 / var(--grid-line) 100% no-repeat,
-    linear-gradient(#000000, #000000) 75% 0 / var(--grid-line) 100% no-repeat,
-    linear-gradient(#000000, #000000) 50% 50% / 50% var(--grid-line) no-repeat;
 }
 
 .trace-char {
-  position: absolute;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: #ffffff;
   color: var(--trace-color);
   line-height: 1;
   user-select: none;
   pointer-events: none;
+  overflow: hidden;
 }
 
 .trace-char--large {
-  left: 0;
-  top: 0;
-  width: 50%;
-  height: 100%;
+  grid-column: 1;
+  grid-row: 1 / span 2;
   font-size: calc(var(--big-cell-mm) * 0.96);
 }
 
 .trace-char--small {
-  width: 25%;
-  height: 50%;
   font-size: calc(var(--small-cell-mm) * 0.96);
 }
 
 .trace-char--small-1 {
-  left: 50%;
-  top: 0;
+  grid-column: 2;
+  grid-row: 1;
 }
 
 .trace-char--small-2 {
-  left: 75%;
-  top: 0;
+  grid-column: 3;
+  grid-row: 1;
 }
 
 .trace-char--small-3 {
-  left: 50%;
-  top: 50%;
+  grid-column: 2;
+  grid-row: 2;
 }
 
 .trace-char--small-4 {
-  left: 75%;
-  top: 50%;
+  grid-column: 3;
+  grid-row: 2;
 }
 
 .trace-char.font-cjk {
