@@ -259,14 +259,11 @@ button {
 
 /* 修正隔線跑掉：改用真正的 CSS Grid + 1px 黑色 gap 當格線 */
 .trace-module {
-  width: calc(var(--big-cell-mm) + var(--small-cell-mm) + var(--small-cell-mm) + (var(--grid-line) * 4));
-  height: calc(var(--big-cell-mm) + (var(--grid-line) * 3));
+  width: calc(var(--big-cell-mm) + (var(--small-cell-mm) * 2));
+  height: var(--big-cell-mm);
   display: grid;
   grid-template-columns: var(--big-cell-mm) var(--small-cell-mm) var(--small-cell-mm);
   grid-template-rows: var(--small-cell-mm) var(--small-cell-mm);
-  gap: var(--grid-line);
-  padding: var(--grid-line);
-  background: #000000;
   flex: 0 0 auto;
   margin-right: calc(var(--grid-line) * -1);
   margin-bottom: calc(var(--grid-line) * -1);
@@ -282,12 +279,14 @@ button {
   user-select: none;
   pointer-events: none;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .trace-char--large {
   grid-column: 1;
   grid-row: 1 / span 2;
   font-size: calc(var(--big-cell-mm) * 0.96);
+  border: 1px solid #000000;
 }
 
 .trace-char--small {
@@ -297,21 +296,31 @@ button {
 .trace-char--small-1 {
   grid-column: 2;
   grid-row: 1;
+  border-top: 1px solid #000000;
+  border-right: 1px solid #000000;
+  border-bottom: 1px solid #000000;
 }
 
 .trace-char--small-2 {
   grid-column: 3;
   grid-row: 1;
+  border-top: 1px solid #000000;
+  border-right: 1px solid #000000;
+  border-bottom: 1px solid #000000;
 }
 
 .trace-char--small-3 {
   grid-column: 2;
   grid-row: 2;
+  border-right: 1px solid #000000;
+  border-bottom: 1px solid #000000;
 }
 
 .trace-char--small-4 {
   grid-column: 3;
   grid-row: 2;
+  border-right: 1px solid #000000;
+  border-bottom: 1px solid #000000;
 }
 
 .trace-char.font-cjk {
