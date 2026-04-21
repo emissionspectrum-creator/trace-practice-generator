@@ -6,187 +6,119 @@
   <title>描紅練字頁產生器</title>
   <meta
     name="description"
-    content="描紅練字頁產生器：逐字輸入、每個字元一個模組、A4 直式預覽、純前端匯出 PDF。"
+    content="描紅練字頁產生器：一大四小模組、A4 直式預覽、純前端 PDF 匯出。"
   >
   <meta name="theme-color" content="#2563eb">
   <meta name="color-scheme" content="light">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-  <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Huninn&display=swap"
-  >
-  <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap"
+  <link rel="preconnect" href="https://fonts.googleapis.comf="https://fonts.gstatic.com" crossoriginttps://fonts.googleapis.com/css2?family=Huninn&display=swap"
+ https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap"
   >
 
-  <link rel="stylesheet" href="./style.css">
-
-  <script
-    src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
+  <link rel="stylesheet" href="./style.csscdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
     defer
-  ></script>
-  <script
-    src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+ ttps://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
     defer
   ></script>
   <script src="./script.js" defer></script>
 </head>
 <body>
   <div class="app-shell">
-    <header class="app-header">
-      <div class="app-header__inner">
-        <div class="brand">
-          <h1 class="brand__title">描紅練字頁產生器</h1>
-          <p class="brand__subtitle">逐字輸入｜每字一模組｜A4 直式預覽｜PDF 匯出</p>
+    <aside class="control-panel" aria-labelledby="control-panel-title">
+      <h1 id="control-panel-title" class="panel-title">描紅練字頁產生器</h1>
+      <p class="panel-subtitle">固定版型：左 1 大格，右 4 小格（2 × 2）</p>
+
+      <div class="control-card">
+        <label class="control-label" for="charInput">字元輸入</label>
+        <div class="inline-row">
+          <input
+            id="charInput"
+            class="char-input"
+            type="text"
+            inputmode="text"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="輸入字元後按『輸入』"
+            aria-label="字元輸入欄"
+          >
+          <button id="addCharBtn" type="button">輸入</button>
         </div>
       </div>
-    </header>
 
-    <main class="app-main">
-      <section class="control-panel" aria-labelledby="settings-title">
-        <div class="panel-card">
-          <h2 id="settings-title">設定</h2>
+      <div class="control-card">
+        <button id="clearAllBtn" type="button" class="secondary-btn">全部清除</button>
+      </div>
 
-          <div class="form-group">
-            <label for="inputText">輸入文字</label>
-            <textarea
-              id="inputText"
-              name="inputText"
-              rows="8"
-              placeholder="請輸入要產生描紅練字頁的內容"
-              autocomplete="off"
-              spellcheck="false"
-            ></textarea>
-            <p class="form-help">逐字處理，每個字元一個模組。</p>
-          </div>
+      <div class="control-card">
+        <button id="exportPdfBtn" type="button">輸出 PDF</button>
+      </div>
 
-          <div class="form-group">
-            <label for="bigCellSizeCm">大格大小（cm）</label>
-            <input
-              id="bigCellSizeCm"
-              name="bigCellSizeCm"
-              type="number"
-              min="1"
-              max="8"
-              step="0.1"
-              value="3.0"
-              inputmode="decimal"
-            >
-            <p class="form-help">左側 1 大格，右側 4 小格（2 × 2）。</p>
-          </div>
+      <div class="control-card">
+        <label class="control-label" for="bigCellSizeCm">大格子的大小（cm）</label>
+        <input
+          id="bigCellSizeCm"
+          type="number"
+          min="1"
+          max="5"
+          step="0.1"
+          value="1.5"
+          inputmode="decimal"
+        >
+        <p id="sizeInfo" class="helper-text">大格 1.5 cm｜小格 0.75 cm｜頁邊距 1.5 cm</p>
+      </div>
 
-          <div class="form-group">
-            <label for="pagePaddingMm">頁面邊界（mm）</label>
-            <input
-              id="pagePaddingMm"
-              name="pagePaddingMm"
-              type="number"
-              min="5"
-              max="30"
-              step="1"
-              value="12"
-              inputmode="numeric"
-            >
-          </div>
+      <div class="control-card">
+        <h2 class="section-title">字體規則</h2>
+        <ul class="rule-list">
+          <li>中文／數字／標點／特殊符號：Huninn</li>
+          <li>英文：Comfortaa</li>
+          <li>所有格內皆顯示同一個淺灰色字元供描紅</li>
+        </ul>
+      </div>
 
-          <div class="form-group">
-            <label for="traceOpacity">描紅字透明度</label>
-            <input
-              id="traceOpacity"
-              name="traceOpacity"
-              type="range"
-              min="0.05"
-              max="0.5"
-              step="0.01"
-              value="0.18"
-            >
-            <output id="traceOpacityValue" for="traceOpacity">0.18</output>
-          </div>
+      <div class="control-card">
+        <h2 class="section-title">狀態</h2>
+        <p id="statusMessage" class="status-message" aria-live="polite">尚未加入字元。</p>
+      </div>
+    </aside>
 
-          <div class="form-group">
-            <label for="showGridGuides">
-              <input
-                id="showGridGuides"
-                name="showGridGuides"
-                type="checkbox"
-                checked
-              >
-              顯示格線輔助線
-            </label>
-          </div>
+    <main class="preview-panel" aria-labelledby="preview-title">
+      <div class="preview-toolbar">
+        <div>
+          <h2 id="preview-title">A4 直式預覽</h2>
+          <p class="preview-subtitle">右側預覽與最終 PDF 版面一致</p>
+        </div>
+      </div>
 
-          <div class="button-row">
-            <button id="generateBtn" type="button">更新預覽</button>
-            <button id="exportPdfBtn" type="button">匯出 PDF</button>
-            <button id="resetBtn" type="button">重設</button>
+      <div id="previewStage" class="preview-stage">
+        <div id="previewScaler" class="preview-scaler">
+          <div id="previewTransform" class="preview-transform">
+            <div id="pagePreview" class="a4-page" aria-label="A4 直式預覽頁面">
+              <div class="page-ruler" aria-hidden="true">
+                <span class="page-ruler__bar"></span>
+                <span class="page-ruler__label">1 cm</span>
+              </div>
+              <div id="pageContent" class="page-content"></div>
+              <div id="emptyState" class="empty-state">請在左側輸入字元，按下「輸入」後加入描紅模組。</div>
+            </div>
           </div>
         </div>
-
-        <div class="panel-card">
-          <h2>字型規則</h2>
-          <ul class="rule-list">
-            <li>中文 / 數字 / 標點 / 特殊符號：Huninn</li>
-            <li>英文：Comfortaa</li>
-            <li>版型：左 1 大格、右 4 小格（2 × 2）</li>
-            <li>預覽尺寸：A4 直式</li>
-          </ul>
-        </div>
-
-        <div class="panel-card">
-          <h2>狀態</h2>
-          <p id="statusMessage" class="status-message" aria-live="polite">
-            尚未產生預覽。
-          </p>
-        </div>
-      </section>
-
-      <section class="preview-panel" aria-labelledby="preview-title">
-        <div class="preview-toolbar">
-          <h2 id="preview-title">即時預覽</h2>
-          <div class="preview-meta">
-            <span>A4 Portrait</span>
-          </div>
-        </div>
-
-        <div class="preview-stage" id="previewStage">
-          <div
-            class="a4-page"
-            id="pagePreview"
-            data-page-size="A4"
-            data-page-orientation="portrait"
-            aria-label="A4 直式預覽頁面"
-          >
-            <div id="pageContent" class="page-content"></div>
-          </div>
-        </div>
-      </section>
+      </div>
     </main>
   </div>
 
-  <template id="characterModuleTemplate">
-    <article class="character-module">
-      <div class="character-module__left">
-        <div class="practice-cell practice-cell--large">
-          <span class="trace-char" aria-hidden="true"></span>
-        </div>
-      </div>
-      <div class="character-module__right">
-        <div class="practice-cell practice-cell--small"></div>
-        <div class="practice-cell practice-cell--small"></div>
-        <div class="practice-cell practice-cell--small"></div>
-        <div class="practice-cell practice-cell--small"></div>
-      </div>
-    </article>
+  <template id="moduleTemplate">
+    <div class="trace-module" aria-hidden="true">
+      <span class="trace-char trace-char--large"></span>
+      <span class="trace-char trace-char--small trace-char--small-1"></span>
+      <span class="trace-char trace-char--small trace-char--small-2"></span>
+      <span class="trace-char trace-char--small trace-char--small-3"></span>
+      <span class="trace-char trace-char--small trace-char--small-4"></span>
+    </div>
   </template>
 
   <noscript>
-    <div class="noscript-message">
-      這個工具需要啟用 JavaScript 才能正常使用。
-    </div>
+    <div class="noscript-message">這個工具需要啟用 JavaScript 才能正常使用。</div>
   </noscript>
 </body>
 </html>
