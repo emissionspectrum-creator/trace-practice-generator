@@ -6,7 +6,6 @@
   --muted: #6b7280;
   --primary: #2563eb;
   --primary-hover: #1d4ed8;
-  --danger: #dc2626;
   --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
 
   --a4-width-mm: 210;
@@ -186,7 +185,7 @@ input[type="checkbox"] {
   border-radius: 12px;
   padding: 11px 14px;
   font-weight: 700;
-  transition: transform 0.06s ease, background-color 0.15s ease, opacity 0.15s ease;
+  transition: transform 0.06s ease, background-color 0.15s ease;
 }
 
 .button-row button:active {
@@ -213,6 +212,13 @@ input[type="checkbox"] {
   background: #d1d5db;
 }
 
+#exportPdfBtn:disabled,
+#generateBtn:disabled,
+#resetBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .rule-list {
   margin: 0;
   padding-left: 20px;
@@ -224,6 +230,7 @@ input[type="checkbox"] {
   margin: 0;
   color: var(--muted);
   line-height: 1.7;
+  white-space: pre-line;
 }
 
 .preview-panel {
@@ -372,6 +379,12 @@ input[type="checkbox"] {
 
 .trace-char.is-space {
   opacity: 0;
+}
+
+.module-space {
+  width: 100%;
+  height: 0;
+  flex-basis: 100%;
 }
 
 .page-placeholder {
