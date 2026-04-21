@@ -171,10 +171,19 @@ function updatePreviewScale() {
       return;
     }
 
-    const scale = Math.min(stageWidth / pageWidth, stageHeight / pageHeight, 1);
+    const rawScale = Math.min(stageWidth / pageWidth, stageHeight / pageHeight, 1);
+    const scale = Math.max(0.1, rawScale);
+
     elements.previewScaler.style.width = `${pageWidth * scale}px`;
     elements.previewScaler.style.height = `${pageHeight * scale}px`;
-    elements.previewTransform.style.transform = `scale(${scale})`;
+
+    if (typeof elements.previewTransform.style.zoom !== "undefined") {
+      elements.previewTransform.style.zoom = String(scale);
+      elements.previewTransform.style.transform = "none";
+    } else {
+      elements.previewTransform.style.zoom = "";
+      elements.previewTransform.style.transform = `scale(${scale})`;
+    }
   });
 }
 
