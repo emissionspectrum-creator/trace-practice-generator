@@ -1,50 +1,185 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>描紅練字頁產生器</title>
-  <meta name="description" content="逐字輸入，立即產生 A4 描紅練字頁，並可直接下載 PDF。">
+  <meta name="description" content="描紅練字頁產生器：逐字輸入、A4 直式預覽、可調整格子大小、純前端匯出 PDF。">
+  <meta name="theme-color" content="#2563eb">
 
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <!-- Inline favicon to avoid local favicon.svg 404 -->
+  <link
+    rel="icon"
+    type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%232563eb'/%3E%3Cpath d='M14 16h36v32H14z' fill='%23ffffff' opacity='0.96'/%3E%3Cpath d='M14 32h36M32 16v32' stroke='%232563eb' stroke-width='2' opacity='0.6'/%3E%3Cpath d='M32 16l18 16-18 16' stroke='%232563eb' stroke-width='2.5' fill='none' opacity='0.8'/%3E%3C/svg%3E"
+  >
 
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
     rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;700&family=Huninn&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Huninn&display=swap"
   >
 
-  <link rel="stylesheet" href="./style.css">
-</head>
-<body>
-  <div class="app-shell">
-    <aside class="control-panel">
-      <h1>描紅練字頁產生器</h1>
+  <!-- Local stylesheet -->
+  <link rel="stylesheet" href="style.css">
 
-      <div class="control-row">
-        <input id="charInput" type="text" placeholder="輸入 1 個字元">
-        <button id="addCharBtn" type="button">輸入</button>
-      </div>
-
-      <button id="clearBtn" type="button">全部清除</button>
-      <button id="exportPdfBtn" type="button">輸出 PDF</button>
-
-      <label>
-        大格子的大小（cm）
-        <input id="bigSizeInput" type="number" step="0.1" min="0.5" max="5">
-      </label>
-    </aside>
-
-    <main class="preview-panel">
-      <div class="ruler">1 cm</div>
-      <div id="preview">
-        <div id="paper">
-          <div id="sheetContent"></div>
+  <!-- External libraries -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"
+    defer
+  ></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"
+    defer
+ d__title">描紅練字頁產生器</h1>
+          <p class="brand__subtitle">逐字輸入｜A4 直式預覽｜純前端 PDF 匯出</p>
         </div>
       </div>
+    </header>
+
+    <main class="app-main">
+      <section class="control-panel" aria-labelledby="settings-title">
+        <div class="panel-card">
+          <h2 id="settings-title">設定</h2>
+
+          <div class="form-group">
+            <label for="inputText">輸入文字</label>
+            <textarea
+              id="inputText"
+              name="inputText"
+              rows="8"
+              placeholder="請輸入要產生描紅練字頁的內容"
+              autocomplete="off"
+              spellcheck="false"
+            ></textarea>
+            <p class="form-help">逐字處理，每個字元一個模組。</p>
+          </div>
+
+          <div class="form-group">
+            <label for="bigCellSizeCm">大格大小（cm）</label>
+            <input
+              id="bigCellSizeCm"
+              name="bigCellSizeCm"
+              type="number"
+              min="1"
+              max="8"
+              step="0.1"
+              value="3.0"
+              inputmode="decimal"
+            >
+            <p class="form-help">右側小格會依此比例自動配置。</p>
+          </div>
+
+          <div class="form-group">
+            <label for="pagePaddingMm">頁面邊界（mm）</label>
+            <input
+              id="pagePaddingMm"
+              name="pagePaddingMm"
+              type="number"
+              min="5"
+              max="30"
+              step="1"
+              value="12"
+              inputmode="numeric"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="traceOpacity">描紅字透明度</label>
+            <input
+              id="traceOpacity"
+              name="traceOpacity"
+              type="range"
+              min="0.05"
+              max="0.5"
+              step="0.01"
+              value="0.18"
+            >
+            <output id="traceOpacityValue" for="traceOpacity">0.18</output>
+          </div>
+
+          <div class="form-group">
+            <label for="showGridGuides">
+              <input
+                id="showGridGuides"
+                name="showGridGuides"
+                type="checkbox"
+                checked
+              >
+              顯示格線輔助線
+            </label>
+          </div>
+
+          <div class="button-row">
+            <button id="generateBtn" type="button">更新預覽</button>
+            <button id="exportPdfBtn" type="button">匯出 PDF</button>
+            <button id="resetBtn" type="button">重設</button>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <h2>字型規則</h2>
+          <ul class="rule-list">
+            <li>中文 / 數字 / 標點 / 特殊符號：Huninn</li>
+            <li>英文：Comfortaa</li>
+            <li>版型：左 1 大格、右 4 小格（2 × 2）</li>
+            <li>預覽尺寸：A4 直式</li>
+          </ul>
+        </div>
+
+        <div class="panel-card">
+          <h2>狀態</h2>
+          <p id="statusMessage" class="status-message" aria-live="polite">
+            尚未產生預覽。
+          </p>
+        </div>
+      </section>
+
+      <section class="preview-panel" aria-labelledby="preview-title">
+        <div class="preview-toolbar">
+          <h2 id="preview-title">即時預覽</h2>
+          <div class="preview-meta">
+            <span>A4 Portrait</span>
+          </div>
+        </div>
+
+        <div class="preview-stage" id="previewStage">
+          <div
+            class="a4-page"
+            id="pagePreview"
+            data-page-size="A4"
+            data-page-orientation="portrait"
+            aria-label="A4 直式預覽頁面"
+          >
+            <div id="pageContent" class="page-content"></div>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js
+  <template id="characterModuleTemplate">
+    <article class="character-module">
+      <div class="character-module__left">
+        <div class="practice-cell practice-cell--large">
+          <span class="trace-char" aria-hidden="true"></span>
+        </div>
+      </div>
+      <div class="character-module__right">
+        <div class="practice-cell practice-cell--small"></div>
+        <div class="practice-cell practice-cell--small"></div>
+        <div class="practice-cell practice-cell--small"></div>
+        <div class="practice-cell practice-cell--small"></div>
+      </div>
+    </article>
+  </template>
+
+  <noscript>
+    <div class="noscript-message">
+      這個工具需要啟用 JavaScript 才能正常使用。
+    </div>
+  </noscript>
+</body>
+</html>
