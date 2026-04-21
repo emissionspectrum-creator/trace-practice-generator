@@ -1,40 +1,43 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>描紅練字頁產生器</title>
-  <meta name="description" content="描紅練字頁產生器：逐字輸入、A4 直式預覽、可調整格子大小、純前端匯出 PDF。">
+  <meta
+    name="description"
+    content="描紅練字頁產生器：逐字輸入、每個字元一個模組、A4 直式預覽、純前端匯出 PDF。"
+  >
   <meta name="theme-color" content="#2563eb">
+  <meta name="color-scheme" content="light">
 
-  <!-- Inline favicon to avoid local favicon.svg 404 -->
   <link
     rel="icon"
     type="image/svg+xml"
-    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%232563eb'/%3E%3Cpath d='M14 16h36v32H14z' fill='%23ffffff' opacity='0.96'/%3E%3Cpath d='M14 32h36M32 16v32' stroke='%232563eb' stroke-width='2' opacity='0.6'/%3E%3Cpath d='M32 16l18 16-18 16' stroke='%232563eb' stroke-width='2.5' fill='none' opacity='0.8'/%3E%3C/svg%3E"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%232563eb'/%3E%3Crect x='12' y='12' width='40' height='40' rx='4' fill='white'/%3E%3Cpath d='M32 12v40M12 32h40' stroke='%232563eb' stroke-width='2' opacity='0.45'/%3E%3C/svg%3E"
   >
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
   <link
     rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Huninn&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Huninn&display=swap"
+  >
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap"
   >
 
-  <!-- Local stylesheet -->
-  <link rel="stylesheet" href="style.css">
-
-  <!-- External libraries -->
-  <script
-    src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"
-    defer
-  ></script>
-  <script
-    src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"
-    defer
- d__title">描紅練字頁產生器</h1>
-          <p class="brand__subtitle">逐字輸入｜A4 直式預覽｜純前端 PDF 匯出</p>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="app-header__inner">
+        <div class="brand">
+          <h1 class="brand__title">描紅練字頁產生器</h1>
+          <p class="brand__subtitle">逐字輸入｜每字一模組｜A4 直式預覽｜PDF 匯出</p>
         </div>
       </div>
     </header>
@@ -69,7 +72,7 @@
               value="3.0"
               inputmode="decimal"
             >
-            <p class="form-help">右側小格會依此比例自動配置。</p>
+            <p class="form-help">左側 1 大格，右側 4 小格（2 × 2）。</p>
           </div>
 
           <div class="form-group">
@@ -181,5 +184,15 @@
       這個工具需要啟用 JavaScript 才能正常使用。
     </div>
   </noscript>
+
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
+    defer
+  ></script>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+    defer
+  ></script>
+  <script src="./script.js" defer></script>
 </body>
 </html>
