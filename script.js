@@ -1,27 +1,30 @@
-const STORAGE_KEY = "trace-practice-generator-settings-v1";
+const SETTINGS_KEY = "trace-practice-generator-settings-v2";
 
 const DEFAULT_SETTINGS = {
-  text: "",
-  bigCellSizeCm: 3.0,
-  pagePaddingMm: 12,
-  traceOpacity: 0.18,
-  showGridGuides: true
+  bigCellSizeCm: 1.5,
+  fontPreset: "huninn-comfortaa"
+};
+
+const state = {
+  modules: [],
+  settings: loadSettings()
 };
 
 const elements = {
-  inputText: document.getElementById("inputText"),
-  bigCellSizeCm: document.getElementById("bigCellSizeCm"),
-  pagePaddingMm: document.getElementById("pagePaddingMm"),
-  traceOpacity: document.getElementById("traceOpacity"),
-  traceOpacityValue: document.getElementById("traceOpacityValue"),
-  showGridGuides: document.getElementById("showGridGuides"),
-  generateBtn: document.getElementById("generateBtn"),
+  charInput: document.getElementById("charInput"),
+  addCharBtn: document.getElementById("addCharBtn"),
+  clearAllBtn: document.getElementById("clearAllBtn"),
   exportPdfBtn: document.getElementById("exportPdfBtn"),
-  resetBtn: document.getElementById("resetBtn"),
+  bigCellSizeCm: document.getElementById("bigCellSizeCm"),
+  sizeInfo: document.getElementById("sizeInfo"),
   statusMessage: document.getElementById("statusMessage"),
+  previewStage: document.getElementById("previewStage"),
+  previewScaler: document.getElementById("previewScaler"),
+  previewTransform: document.getElementById("previewTransform"),
   pagePreview: document.getElementById("pagePreview"),
   pageContent: document.getElementById("pageContent"),
-  moduleTemplate: document.getElementById("characterModuleTemplate")
+  emptyState: document.getElementById("emptyState"),
+  moduleTemplate: document.getElementById("moduleTemplate")
 };
 
 function clamp(value, min, max) {
@@ -33,38 +36,17 @@ function safeNumber(value, fallback) {
   return Number.isFinite(number) ? number : fallback;
 }
 
-function getSettingsFromUI() {
-  return {
-    text: elements.inputText.value || "",
-    bigCellSizeCm: clamp(safeNumber(elements.bigCellSizeCm.value, DEFAULT_SETTINGS.bigCellSizeCm), 1, 8),
-    pagePaddingMm: clamp(safeNumber(elements.pagePaddingMm.value, DEFAULT_SETTINGS.pagePaddingMm), 5, 30),
-    traceOpacity: clamp(safeNumber(elements.traceOpacity.value, DEFAULT_SETTINGS.traceOpacity), 0.05, 0.5),
-    showGridGuides: elements.showGridGuides.checked
-  };
-}
-
-function applySettingsToUI(settings) {
-  elements.inputText.value = settings.text;
-  elements.bigCellSizeCm.value = Number(settings.bigCellSizeCm).toFixed(1);
-  elements.pagePaddingMm.value = String(settings.pagePaddingMm);
-  elements.traceOpacity.value = Number(settings.traceOpacity).toFixed(2);
-  elements.traceOpacityValue.textContent = Number(settings.traceOpacity).toFixed(2);
-  elements.showGridGuides.checked = Boolean(settings.showGridGuides);
-}
-
 function loadSettings() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(SETTINGS_KEY);
     if (!raw) {
       return { ...DEFAULT_SETTINGS };
     }
+
     const parsed = JSON.parse(raw);
     return {
-      text: typeof parsed.text === "string" ? parsed.text : DEFAULT_SETTINGS.text,
-      bigCellSizeCm: clamp(safeNumber(parsed.bigCellSizeCm, DEFAULT_SETTINGS.bigCellSizeCm), 1, 8),
-      pagePaddingMm: clamp(safeNumber(parsed.pagePaddingMm, DEFAULT_SETTINGS.pagePaddingMm), 5, 30),
-      traceOpacity: clamp(safeNumber(parsed.traceOpacity, DEFAULT_SETTINGS.traceOpacity), 0.05, 0.5),
-      showGridGuides: typeof parsed.showGridGuides === "boolean" ? parsed.showGridGuides : DEFAULT_SETTINGS.showGridGuides
+      bigCellSizeCm: clamp(safeNumber(parsed.bigCellSizeCm, DEFAULT_SETTINGS.bigCellSizeCm), 1, 5),
+      fontPreset: parsed.fontPreset || DEFAULT_SETTINGS.fontPreset
     };
   } catch (error) {
     console.warn("讀取設定失敗，將使用預設值。", error);
@@ -72,133 +54,139 @@ function loadSettings() {
   }
 }
 
-function saveSettings(settings) {
+function saveSettings() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
   } catch (error) {
     console.warn("儲存設定失敗。", error);
   }
-}
-
-function updateCssVariables(settings) {
-  const root = document.documentElement;
-  root.style.setProperty("--large-cell-cm", String(settings.bigCellSizeCm));
-  root.style.setProperty("--page-padding-mm", String(settings.pagePaddingMm));
-  root.style.setProperty("--trace-opacity", Number(settings.traceOpacity).toFixed(2));
-}
-
-function setStatus(message) {
-  elements.statusMessage.textContent = message;
 }
 
 function isLatinCharacter(char) {
   return /^[A-Za-z]$/.test(char);
 }
 
-function isWhitespaceCharacter(char) {
-  return char === " " || char === "\t";
+function sanitizeFilename(name) {
+  const cleaned = String(name || "")
+    .replace(/[\\/:*?"<>|]/g, "_")
+    .trim();
+
+  return cleaned || "trace-practice-sheet";
 }
 
-function createPlaceholder() {
-  const placeholder = document.createElement("div");
-  placeholder.className = "page-placeholder";
-  placeholder.textContent = "請在左側輸入文字，右側會即時產生描紅練字頁預覽。";
-  return placeholder;
+function splitCharacters(text) {
+  return Array.from(text || "").filter((char) => char !== "\r" && char !== "\n");
 }
 
-function applyCharacterFont(traceNode, char) {
-  const largeCellSizeCm = clamp(safeNumber(elements.bigCellSizeCm.value, DEFAULT_SETTINGS.bigCellSizeCm), 1, 8);
-  const fontSizeMm = largeCellSizeCm * 10 * 0.72;
-
-  traceNode.textContent = char;
-  traceNode.style.fontSize = `${fontSizeMm}mm`;
-
-  if (isLatinCharacter(char)) {
-    traceNode.classList.add("font-latin");
-    traceNode.classList.remove("font-cjk");
-  } else {
-    traceNode.classList.add("font-cjk");
-    traceNode.classList.remove("font-latin");
-  }
-
-  if (isWhitespaceCharacter(char)) {
-    traceNode.classList.add("is-space");
-  } else {
-    traceNode.classList.remove("is-space");
-  }
+function updateCssVariables() {
+  const root = document.documentElement;
+  const bigCell = clamp(state.settings.bigCellSizeCm, 1, 5);
+  root.style.setProperty("--big-cell-cm", String(bigCell));
+  root.style.setProperty("--page-margin-mm", `calc(${bigCell} * 10mm)`);
 }
 
-function createModuleForCharacter(char, showGridGuides) {
+function updateSizeInfo() {
+  const big = clamp(state.settings.bigCellSizeCm, 1, 5);
+  const small = big / 2;
+  elements.sizeInfo.textContent = `大格 ${big.toFixed(1)} cm｜小格 ${small.toFixed(2)} cm｜頁邊距 ${big.toFixed(1)} cm`;
+}
+
+function setStatus(message) {
+  elements.statusMessage.textContent = message;
+}
+
+function applySettingsToUI() {
+  elements.bigCellSizeCm.value = state.settings.bigCellSizeCm.toFixed(1);
+  updateSizeInfo();
+}
+
+function buildModule(char) {
   const fragment = elements.moduleTemplate.content.cloneNode(true);
-  const moduleElement = fragment.querySelector(".character-module");
-  const cells = fragment.querySelectorAll(".practice-cell");
-  const traceNode = fragment.querySelector(".trace-char");
+  const moduleElement = fragment.querySelector(".trace-module");
+  const charNodes = fragment.querySelectorAll(".trace-char");
+  const fontClass = isLatinCharacter(char) ? "font-latin" : "font-cjk";
 
-  cells.forEach((cell) => {
-    cell.classList.toggle("guide-hidden", !showGridGuides);
+  charNodes.forEach((node) => {
+    node.textContent = char;
+    node.classList.add(fontClass);
   });
-
-  applyCharacterFont(traceNode, char);
 
   return moduleElement;
 }
 
-function createLineBreakSpacer() {
-  const spacer = document.createElement("div");
-  spacer.className = "module-space";
-  spacer.setAttribute("aria-hidden", "true");
-  return spacer;
-}
-
-function renderPreview() {
-  const settings = getSettingsFromUI();
-  saveSettings(settings);
-  updateCssVariables(settings);
-
+function renderModules() {
   elements.pageContent.innerHTML = "";
 
-  const characters = Array.from(settings.text || "");
-  if (characters.length === 0) {
-    elements.pageContent.appendChild(createPlaceholder());
-    setStatus("尚未輸入文字。請在左側輸入內容。\n設定會自動儲存於本機瀏覽器。");
+  if (state.modules.length === 0) {
+    elements.emptyState.classList.remove("is-hidden");
+    setStatus("尚未加入字元。\n大格 1 個，小格 4 個，所有格內都顯示同一字元。\n目前不保留任何空白練習格。");
+    updatePreviewScale();
     return;
   }
 
-  let visibleCount = 0;
+  elements.emptyState.classList.add("is-hidden");
 
-  characters.forEach((char) => {
-    if (char === "\r") {
-      return;
-    }
-
-    if (char === "\n") {
-      elements.pageContent.appendChild(createLineBreakSpacer());
-      return;
-    }
-
-    const moduleElement = createModuleForCharacter(char, settings.showGridGuides);
-    elements.pageContent.appendChild(moduleElement);
-    visibleCount += 1;
+  state.modules.forEach((char) => {
+    elements.pageContent.appendChild(buildModule(char));
   });
 
-  setStatus(`已產生 ${visibleCount} 個字元模組。\n目前大格大小：${settings.bigCellSizeCm.toFixed(1)} cm。`);
+  const big = state.settings.bigCellSizeCm;
+  setStatus(
+    `目前共有 ${state.modules.length} 個字元模組。\n大格 ${big.toFixed(1)} cm，小格 ${(big / 2).toFixed(2)} cm，頁邊距 ${big.toFixed(1)} cm。`
+  );
+
+  updatePreviewScale();
 }
 
-async function waitForFontsReady() {
-  if (document.fonts && typeof document.fonts.ready === "object") {
-    try {
-      await document.fonts.ready;
-    } catch (error) {
-      console.warn("字型等待失敗，將繼續匯出。", error);
-    }
+function addCharactersFromInput() {
+  const raw = elements.charInput.value;
+  const chars = splitCharacters(raw);
+
+  if (chars.length === 0) {
+    setStatus("請先輸入至少 1 個字元，再按「輸入」。");
+    elements.charInput.focus();
+    return;
   }
+
+  state.modules.push(...chars);
+  elements.charInput.value = "";
+  renderModules();
+  elements.charInput.focus();
+}
+
+function clearAllModules() {
+  state.modules = [];
+  renderModules();
+  elements.charInput.focus();
+}
+
+function updatePreviewScale() {
+  window.requestAnimationFrame(() => {
+    const stageWidth = elements.previewStage.clientWidth - 40;
+    const stageHeight = elements.previewStage.clientHeight - 40;
+    const pageWidth = elements.pagePreview.offsetWidth;
+    const pageHeight = elements.pagePreview.offsetHeight;
+
+    if (!pageWidth || !pageHeight || stageWidth <= 0 || stageHeight <= 0) {
+      return;
+    }
+
+    const scale = Math.min(stageWidth / pageWidth, stageHeight / pageHeight, 1);
+    elements.previewScaler.style.width = `${pageWidth * scale}px`;
+    elements.previewScaler.style.height = `${pageHeight * scale}px`;
+    elements.previewTransform.style.transform = `scale(${scale})`;
+  });
 }
 
 async function exportPdf() {
-  const button = elements.exportPdfBtn;
-  button.disabled = true;
-  document.body.classList.add("is-exporting");
-  setStatus("正在匯出 PDF，請稍候...");
+  const filenameInput = window.prompt("請輸入 PDF 檔名", "trace-practice-sheet");
+  if (filenameInput === null) {
+    return;
+  }
+
+  const filename = sanitizeFilename(filenameInput);
+  elements.exportPdfBtn.disabled = true;
+  setStatus("正在產生 PDF，請稍候...");
 
   try {
     if (typeof window.html2canvas !== "function") {
@@ -208,7 +196,9 @@ async function exportPdf() {
       throw new Error("jsPDF 尚未載入。");
     }
 
-    await waitForFontsReady();
+    if (document.fonts && document.fonts.ready) {
+      await document.fonts.ready;
+    }
 
     const canvas = await window.html2canvas(elements.pagePreview, {
       scale: 2,
@@ -225,66 +215,46 @@ async function exportPdf() {
       compress: true
     });
 
-    const pageWidth = 210;
-    const pageHeight = 297;
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-    if (imgHeight <= pageHeight) {
-      pdf.addImage(imageData, "PNG", 0, 0, imgWidth, imgHeight, undefined, "FAST");
-    } else {
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(imageData, "PNG", 0, position, imgWidth, imgHeight, undefined, "FAST");
-      heightLeft -= pageHeight;
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imageData, "PNG", 0, position, imgWidth, imgHeight, undefined, "FAST");
-        heightLeft -= pageHeight;
-      }
-    }
-
-    pdf.save("trace-practice-sheet.pdf");
-    setStatus("PDF 匯出完成。檔名：trace-practice-sheet.pdf");
+    pdf.addImage(imageData, "PNG", 0, 0, 210, 297, undefined, "FAST");
+    pdf.save(`${filename}.pdf`);
+    setStatus(`PDF 匯出完成：${filename}.pdf`);
   } catch (error) {
     console.error(error);
     setStatus(`PDF 匯出失敗：${error.message}`);
   } finally {
-    button.disabled = false;
-    document.body.classList.remove("is-exporting");
+    elements.exportPdfBtn.disabled = false;
   }
 }
 
-function resetSettings() {
-  const settings = { ...DEFAULT_SETTINGS };
-  applySettingsToUI(settings);
-  saveSettings(settings);
-  renderPreview();
+function handleSizeChange() {
+  const value = clamp(safeNumber(elements.bigCellSizeCm.value, state.settings.bigCellSizeCm), 1, 5);
+  state.settings.bigCellSizeCm = value;
+  saveSettings();
+  updateCssVariables();
+  applySettingsToUI();
+  renderModules();
 }
 
 function bindEvents() {
-  elements.inputText.addEventListener("input", renderPreview);
-  elements.bigCellSizeCm.addEventListener("input", renderPreview);
-  elements.pagePaddingMm.addEventListener("input", renderPreview);
-  elements.traceOpacity.addEventListener("input", () => {
-    elements.traceOpacityValue.textContent = Number(elements.traceOpacity.value).toFixed(2);
-    renderPreview();
-  });
-  elements.showGridGuides.addEventListener("change", renderPreview);
-
-  elements.generateBtn.addEventListener("click", renderPreview);
+  elements.addCharBtn.addEventListener("click", addCharactersFromInput);
+  elements.clearAllBtn.addEventListener("click", clearAllModules);
   elements.exportPdfBtn.addEventListener("click", exportPdf);
-  elements.resetBtn.addEventListener("click", resetSettings);
+  elements.bigCellSizeCm.addEventListener("input", handleSizeChange);
+  elements.charInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      addCharactersFromInput();
+    }
+  });
+  window.addEventListener("resize", updatePreviewScale);
 }
 
 function init() {
-  const settings = loadSettings();
-  applySettingsToUI(settings);
+  updateCssVariables();
+  applySettingsToUI();
   bindEvents();
-  renderPreview();
+  renderModules();
+  elements.charInput.focus();
 }
 
 window.addEventListener("DOMContentLoaded", init);
