@@ -15,12 +15,12 @@
   --big-cell-cm: 1.5;
   --big-cell-mm: calc(var(--big-cell-cm) * 10mm);
   --small-cell-mm: calc(var(--big-cell-mm) / 2);
-  --page-margin-mm: var(--big-cell-mm);
+  --page-margin-mm: 15mm;
   --grid-line: 1px;
   --trace-color: #c7cdd6;
 
-  --font-cjk: "Huninn", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
-  --font-latin: "Comfortaa", "Segoe UI", Arial, sans-serif;
+  --font-cjk: "隨峰體", "The Peak Font 隨峰體 Beta", "Iansui", "Noto Sans TC", sans-serif;
+  --font-latin: "Iansui", "Segoe UI", Arial, sans-serif;
   --font-ui: "Segoe UI", "Microsoft JhengHei", sans-serif;
 }
 
@@ -104,7 +104,8 @@ button {
 }
 
 .char-input,
-#bigCellSizeCm {
+#bigCellSizeCm,
+#pageMarginCm {
   width: 100%;
   border: 1px solid #cbd5e1;
   border-radius: 12px;
@@ -115,9 +116,14 @@ button {
 }
 
 .char-input:focus,
-#bigCellSizeCm:focus {
+#bigCellSizeCm:focus,
+#pageMarginCm:focus {
   border-color: #93c5fd;
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+label[for="pageMarginCm"] {
+  margin-top: 14px;
 }
 
 #addCharBtn,
@@ -330,7 +336,7 @@ button {
 
 .trace-char.font-latin {
   font-family: var(--font-latin);
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .empty-state {

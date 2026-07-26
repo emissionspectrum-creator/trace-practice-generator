@@ -11,8 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&display=swap">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Iansui&display=swap">
 
   <link rel="stylesheet" href="./style.css">
 
@@ -63,14 +62,24 @@
           value="1.5"
           inputmode="decimal"
         >
+        <label class="control-label" for="pageMarginCm">頁邊距（cm）</label>
+        <input
+          id="pageMarginCm"
+          type="number"
+          min="0"
+          max="5"
+          step="0.1"
+          value="1.5"
+          inputmode="decimal"
+        >
         <p id="sizeInfo" class="helper-text">大格 1.5 cm｜小格 0.75 cm｜頁邊距 1.5 cm</p>
       </div>
 
       <div class="control-card">
         <h2 class="section-title">字體規則</h2>
         <ul class="rule-list">
-          <li>中文／數字／標點／特殊符號：Huninn</li>
-          <li>英文：Comfortaa</li>
+          <li>中文／全形標點符號：隨峰體（需安裝於系統）</li>
+          <li>英文／數字／半形符號：芫荽 Iansui</li>
           <li>所有格內皆顯示同一個淺灰色字元供描紅</li>
         </ul>
       </div>

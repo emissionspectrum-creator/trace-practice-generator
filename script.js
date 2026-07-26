@@ -2,7 +2,8 @@ const SETTINGS_KEY = "trace-practice-generator-settings-v2";
 
 const DEFAULT_SETTINGS = {
   bigCellSizeCm: 1.5,
-  fontPreset: "huninn-comfortaa"
+  pageMarginCm: 1.5,
+  fontPreset: "peak-iansui"
 };
 
 const state = {
@@ -16,6 +17,7 @@ const elements = {
   clearAllBtn: document.getElementById("clearAllBtn"),
   exportPdfBtn: document.getElementById("exportPdfBtn"),
   bigCellSizeCm: document.getElementById("bigCellSizeCm"),
+  pageMarginCm: document.getElementById("pageMarginCm"),
   sizeInfo: document.getElementById("sizeInfo"),
   statusMessage: document.getElementById("statusMessage"),
   previewStage: document.getElementById("previewStage"),
@@ -46,6 +48,7 @@ function loadSettings() {
     const parsed = JSON.parse(raw);
     return {
       bigCellSizeCm: clamp(safeNumber(parsed.bigCellSizeCm, DEFAULT_SETTINGS.bigCellSizeCm), 1, 5),
+      pageMarginCm: clamp(safeNumber(parsed.pageMarginCm, DEFAULT_SETTINGS.pageMarginCm), 0, 5),
       fontPreset: parsed.fontPreset || DEFAULT_SETTINGS.fontPreset
     };
   } catch (error) {
@@ -63,7 +66,7 @@ function saveSettings() {
 }
 
 function isLatinCharacter(char) {
-  return /^[A-Za-z]$/.test(char);
+  return /^[\x21-\x7E]$/.test(char);
 }
 
 function sanitizeFilename(name) {
@@ -81,14 +84,16 @@ function splitCharacters(text) {
 function updateCssVariables() {
   const root = document.documentElement;
   const bigCell = clamp(state.settings.bigCellSizeCm, 1, 5);
+  const pageMargin = clamp(state.settings.pageMarginCm, 0, 5);
   root.style.setProperty("--big-cell-cm", String(bigCell));
-  root.style.setProperty("--page-margin-mm", `calc(${bigCell} * 10mm)`);
+  root.style.setProperty("--page-margin-mm", `calc(${pageMargin} * 10mm)`);
 }
 
 function updateSizeInfo() {
   const big = clamp(state.settings.bigCellSizeCm, 1, 5);
   const small = big / 2;
-  elements.sizeInfo.textContent = `大格 ${big.toFixed(1)} cm｜小格 ${small.toFixed(2)} cm｜頁邊距 ${big.toFixed(1)} cm`;
+  const margin = clamp(state.settings.pageMarginCm, 0, 5);
+  elements.sizeInfo.textContent = `大格 ${big.toFixed(1)} cm｜小格 ${small.toFixed(2)} cm｜頁邊距 ${margin.toFixed(1)} cm`;
 }
 
 function setStatus(message) {
@@ -97,6 +102,7 @@ function setStatus(message) {
 
 function applySettingsToUI() {
   elements.bigCellSizeCm.value = state.settings.bigCellSizeCm.toFixed(1);
+  elements.pageMarginCm.value = state.settings.pageMarginCm.toFixed(1);
   updateSizeInfo();
 }
 
@@ -236,8 +242,8 @@ async function exportPdf() {
 }
 
 function handleSizeChange() {
-  const value = clamp(safeNumber(elements.bigCellSizeCm.value, state.settings.bigCellSizeCm), 1, 5);
-  state.settings.bigCellSizeCm = value;
+  state.settings.bigCellSizeCm = clamp(safeNumber(elements.bigCellSizeCm.value, state.settings.bigCellSizeCm), 1, 5);
+  state.settings.pageMarginCm = clamp(safeNumber(elements.pageMarginCm.value, state.settings.pageMarginCm), 0, 5);
   saveSettings();
   updateCssVariables();
   applySettingsToUI();
@@ -249,6 +255,7 @@ function bindEvents() {
   elements.clearAllBtn.addEventListener("click", clearAllModules);
   elements.exportPdfBtn.addEventListener("click", exportPdf);
   elements.bigCellSizeCm.addEventListener("input", handleSizeChange);
+  elements.pageMarginCm.addEventListener("input", handleSizeChange);
   elements.charInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
