@@ -3,7 +3,8 @@ const SETTINGS_KEY = "trace-practice-generator-settings-v2";
 const DEFAULT_SETTINGS = {
   bigCellSizeCm: 1.5,
   pageMarginCm: 1.5,
-  fontPreset: "peak-iansui"
+  fontPreset: "peak-iansui",
+  bpmfOnly: false
 };
 
 const state = {
@@ -16,6 +17,7 @@ const elements = {
   addCharBtn: document.getElementById("addCharBtn"),
   clearAllBtn: document.getElementById("clearAllBtn"),
   exportPdfBtn: document.getElementById("exportPdfBtn"),
+  bpmfOnlyToggle: document.getElementById("bpmfOnlyToggle"),
   bigCellSizeCm: document.getElementById("bigCellSizeCm"),
   pageMarginCm: document.getElementById("pageMarginCm"),
   sizeInfo: document.getElementById("sizeInfo"),
@@ -49,7 +51,8 @@ function loadSettings() {
     return {
       bigCellSizeCm: clamp(safeNumber(parsed.bigCellSizeCm, DEFAULT_SETTINGS.bigCellSizeCm), 1, 5),
       pageMarginCm: clamp(safeNumber(parsed.pageMarginCm, DEFAULT_SETTINGS.pageMarginCm), 0, 5),
-      fontPreset: parsed.fontPreset || DEFAULT_SETTINGS.fontPreset
+      fontPreset: parsed.fontPreset || DEFAULT_SETTINGS.fontPreset,
+      bpmfOnly: Boolean(parsed.bpmfOnly)
     };
   } catch (error) {
     console.warn("讀取設定失敗，將使用預設值。", error);
@@ -100,9 +103,15 @@ function setStatus(message) {
   elements.statusMessage.textContent = message;
 }
 
+function applyBpmfMode() {
+  elements.pagePreview.classList.toggle("is-bpmf", state.settings.bpmfOnly);
+}
+
 function applySettingsToUI() {
   elements.bigCellSizeCm.value = state.settings.bigCellSizeCm.toFixed(1);
   elements.pageMarginCm.value = state.settings.pageMarginCm.toFixed(1);
+  elements.bpmfOnlyToggle.checked = state.settings.bpmfOnly;
+  applyBpmfMode();
   updateSizeInfo();
 }
 
@@ -250,10 +259,17 @@ function handleSizeChange() {
   renderModules();
 }
 
+function handleBpmfToggle() {
+  state.settings.bpmfOnly = elements.bpmfOnlyToggle.checked;
+  saveSettings();
+  applyBpmfMode();
+}
+
 function bindEvents() {
   elements.addCharBtn.addEventListener("click", addCharactersFromInput);
   elements.clearAllBtn.addEventListener("click", clearAllModules);
   elements.exportPdfBtn.addEventListener("click", exportPdf);
+  elements.bpmfOnlyToggle.addEventListener("change", handleBpmfToggle);
   elements.bigCellSizeCm.addEventListener("input", handleSizeChange);
   elements.pageMarginCm.addEventListener("input", handleSizeChange);
   elements.charInput.addEventListener("keydown", (event) => {

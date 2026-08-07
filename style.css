@@ -21,7 +21,16 @@
 
   --font-cjk: "隨峰體", "The Peak Font 隨峰體 Beta", "Iansui", "Noto Sans TC", sans-serif;
   --font-latin: "Iansui", "Segoe UI", Arial, sans-serif;
+  --font-bpmf: "Bpmf Zihi Only", var(--font-cjk);
   --font-ui: "Segoe UI", "Microsoft JhengHei", sans-serif;
+}
+
+@font-face {
+  font-family: "Bpmf Zihi Only";
+  src: url("./BpmfSpecial/BpmfZihiOnly-R.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 * {
@@ -95,6 +104,29 @@ button {
 
 .section-title {
   margin-bottom: 8px;
+}
+
+.label-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bpmf-label {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bpmf-toggle {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  margin: 0 4px 0 1px;
+  accent-color: var(--primary);
 }
 
 .inline-row {
@@ -337,6 +369,25 @@ label[for="pageMarginCm"] {
 .trace-char.font-latin {
   font-family: var(--font-latin);
   font-weight: 400;
+}
+
+.a4-page.is-bpmf .trace-char.font-cjk {
+  font-family: var(--font-bpmf);
+}
+
+/* 純注音模式：拿掉小格，只留大格併排 */
+.a4-page.is-bpmf .trace-module {
+  width: var(--big-cell-mm);
+  grid-template-columns: var(--big-cell-mm);
+  grid-template-rows: var(--big-cell-mm);
+}
+
+.a4-page.is-bpmf .trace-char--large {
+  grid-row: 1;
+}
+
+.a4-page.is-bpmf .trace-char--small {
+  display: none;
 }
 
 .empty-state {

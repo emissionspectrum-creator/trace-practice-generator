@@ -27,7 +27,14 @@
       <p class="panel-subtitle">固定版型：左 1 大格，右 4 小格（2 × 2）</p>
 
       <div class="control-card">
-        <label class="control-label" for="charInput">字元輸入</label>
+        <div class="label-row">
+          <label class="control-label" for="charInput">字元輸入</label>
+          <label class="bpmf-label">
+            <span>(</span>
+            <input id="bpmfOnlyToggle" class="bpmf-toggle" type="checkbox">
+            <span>純注音)</span>
+          </label>
+        </div>
         <div class="inline-row">
           <input
             id="charInput"
@@ -79,6 +86,7 @@
         <h2 class="section-title">字體規則</h2>
         <ul class="rule-list">
           <li>中文／全形標點符號：隨峰體（需安裝於系統）</li>
+          <li>勾選「純注音」：中文改用注音（ㄅ字嗨注音而已）</li>
           <li>英文／數字／半形符號：芫荽 Iansui</li>
           <li>所有格內皆顯示同一個淺灰色字元供描紅</li>
         </ul>
