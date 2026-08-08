@@ -1,9 +1,9 @@
 # 描紅練字頁產生器
 
-純前端、可直接部署到 GitHub Pages 的描紅練字頁產生工具。輸入字元後，產生「左 1 大格 + 右 4 小格（2×2）」的固定版型描紅練習頁，並可匯出為 A4 直式 PDF。
+純前端、可直接部署到 GitHub Pages 的描紅練字頁產生工具。輸入字元後，產生「左 1 大格 + 右 4 小格（2×2）」的固定版型描紅練習頁，並可匯出為 A4 直式 PDF。勾選「純注音」可切換為注音描紅模式（**v1.2.0 起**）。
 
 - 線上版：https://emissionspectrum-creator.github.io/trace-practice-generator/
-- 無建置流程、無相依套件管理，`index.html` / `style.css` / `script.js` 三個檔案即是全部。
+- 無建置流程、無相依套件管理：`index.html` / `style.css` / `script.js` 三個檔案，加上 `BpmfSpecial/` 內嵌的注音字型。
 
 ---
 
@@ -12,19 +12,31 @@
 | 項目 | 說明 |
 |---|---|
 | 字元輸入 | 可一次輸入多個字元，逐字建立描紅模組（按 Enter 或「輸入」鈕） |
+| 純注音 | 「字元輸入」右側的 `(□ 純注音)` 勾選框。勾選後中文改用注音字型，版型變為單一大格併排（**v1.2.0 新增**） |
 | 大格子的大小 | 1.0 – 5.0 cm，step 0.1，預設 1.5 cm |
 | 頁邊距 | 0 – 5.0 cm，step 0.1，預設 1.5 cm（**v1.1.0 起可獨立調整**） |
 | 全部清除 | 清空目前所有模組 |
 | 輸出 PDF | A4 直式，檔名可自訂 |
-| 設定保存 | 大格大小與頁邊距存於 localStorage，重新開啟自動沿用 |
+| 設定保存 | 大格大小、頁邊距與純注音勾選狀態存於 localStorage，重新開啟自動沿用 |
 
 ### 版型計算
+
+**一般模式（未勾選純注音）**
 
 - 小格邊長 = 大格 ÷ 2
 - 單一模組寬 = 大格 × 2，高 = 大格
 - 每列模組數 = ⌊(210 − 頁邊距×2) ÷ (大格×2)⌋（單位 mm）
 
-以預設值（大格 1.5 cm、頁邊距 1.5 cm）為例：每列 6 個模組、共 17 列。
+以預設值（大格 1.5 cm、頁邊距 1.5 cm）為例：每列 6 個模組、共 17 列，合計 102 個模組。
+
+**純注音模式（已勾選）**
+
+- 沒有小格，單一模組即一個大格，寬 = 高 = 大格
+- 每列格數 = ⌊(210 − 頁邊距×2) ÷ 大格⌋（單位 mm）
+
+同樣以預設值計算：每列 12 格、共 17 列，合計 204 格。
+
+兩種模式的列數相同（模組高度都是大格），差別只在每列放得下幾個。切換是純 CSS，不會重新產生模組。
 
 ### 左上角的 1 cm 標尺
 
@@ -34,12 +46,15 @@
 
 ## ⚠️ 字型設定（重要）
 
-本工具使用兩套字型，**取得方式不同**：
+本工具使用三套字型，**取得方式不同**：
 
 | 用途 | 字型 | 來源 | 是否需手動安裝 |
 |---|---|---|---|
 | 中文、全形標點符號 | **隨峰體** The Peak Font | [cjkfonts.io](https://cjkfonts.io/blog/ThePeakFont) | **是，必須手動安裝到系統** |
 | 英文、數字、半形符號 | **芫荽** Iansui | Google Fonts（`index.html` 自動載入） | 否 |
+| 中文（勾選純注音時） | **ㄅ字嗨注音而已** Bpmf Zihi Only | 已內嵌於本 repo `BpmfSpecial/` | 否 |
+
+注音字型是唯一提交進 repo 的字型檔（1.7 MB TTF）。它設定了 `font-display: swap`，且瀏覽器只在實際用到字符時才下載 —— **未勾選純注音就不會產生這 1.7 MB 的傳輸**。
 
 ### 隨峰體並未包含在本 repo 中
 
@@ -123,6 +138,30 @@ function isLatinCharacter(char) {
 
 要改變分流，只需調整這一條 regex。
 
+**純注音模式不影響這條規則。** 勾選後只有 `.font-cjk` 的字型被覆寫，英文、數字與半形符號仍套用芫荽 Iansui —— 儘管注音字型本身也含 ASCII 字符（`U+0020`–`U+007E`）。
+
+---
+
+## 純注音模式
+
+勾選「字元輸入」右側的 `(□ 純注音)` 後：
+
+1. **字型切換** — 中文字改用「ㄅ字嗨注音而已」。這是一套注音 IVS 字型，會把漢字的字面替換成對應的注音符號，例如輸入「好」顯示為 `ㄏㄠˇ`
+2. **版型切換** — 小格全部隱藏，模組收成單一大格，大格彼此併排（1 字 1 格）
+
+兩者都是純 CSS，由 `#pagePreview` 上的 `.is-bpmf` class 驅動，DOM 與 `state.modules` 完全不變，因此可隨時來回切換而不遺失已輸入的字。
+
+```css
+.a4-page.is-bpmf .trace-char.font-cjk { font-family: var(--font-bpmf); }
+.a4-page.is-bpmf .trace-module        { width: var(--big-cell-mm);
+                                        grid-template-columns: var(--big-cell-mm);
+                                        grid-template-rows: var(--big-cell-mm); }
+.a4-page.is-bpmf .trace-char--large   { grid-row: 1; }
+.a4-page.is-bpmf .trace-char--small   { display: none; }
+```
+
+勾選狀態以 `bpmfOnly` 鍵存於 localStorage。
+
 ---
 
 ## 本機執行
@@ -138,7 +177,7 @@ python3 -m http.server 8000 --bind 127.0.0.1
 > **不要直接用瀏覽器開啟 `index.html`（`file://` 協定）。**
 > Chrome / Brave 在 `file://` 下會因 CORS 限制擋掉 `@font-face` 的字型載入，且失敗時不會有明顯錯誤訊息。務必透過 HTTP 伺服器存取。
 
-本機執行仍需連網，因為 Google Fonts（芫荽）與 cdnjs（html2canvas、jsPDF）都是外部載入。
+本機執行仍需連網，因為 Google Fonts（芫荽）與 cdnjs（html2canvas、jsPDF）都是外部載入。注音字型不在此列 —— 它由 repo 內的 `BpmfSpecial/` 直接提供，離線也能用。
 
 ---
 
@@ -158,7 +197,7 @@ python3 -m http.server 8000 --bind 127.0.0.1
 
 - PDF 中的文字**無法選取、無法搜尋**
 - 標稱解析度約 **192 DPI**（96 CSS dpi × scale 2），低於印刷級的 300 DPI。用於描紅練習足夠，但放大檢視會看到鋸齒
-- 沒有字型嵌入邏輯 —— **畫面上看到什麼字型，PDF 就是什麼字型**。這也是為什麼字型必須先安裝好
+- 沒有字型嵌入邏輯 —— **畫面上看到什麼字型，PDF 就是什麼字型**。這也是為什麼隨峰體必須先安裝好（注音字型由 repo 提供，不受此限）
 
 若需提高解析度，可調高 `script.js` 中 `html2canvas` 的 `scale` 值，代價是記憶體用量與匯出時間顯著上升。
 
@@ -186,9 +225,26 @@ v1.1.0 起，調整「大格子的大小」**不會**再連帶改變頁邊距。
 
 版本 v0.102（2025-03-13），作者仍在持續修正字形。
 
+### 8. 純注音模式無法選擇破音字的讀音
+
+注音字型以**預設讀音**渲染，破音字只會顯示最常見的那一個音。例如「行」固定顯示 `ㄒㄧㄥˊ`，無法在本工具中切換成 `ㄏㄤˊ`；「重」「長」「樂」同理。
+
+字型本身支援 Unicode IVS（表意文字變體序列）來指定讀音，但本工具沒有實作讀音選擇介面 —— 輸入框收到的是純粹的漢字碼位，不帶變體選擇器。若練習內容包含破音字，請自行確認顯示的注音是否為你要的讀音。
+
 ---
 
 ## 更新紀錄
+
+### v1.2.0 — 2026-08-08
+
+**新增純注音模式**
+
+- 內嵌字型 `BpmfSpecial/BpmfZihiOnly-R.ttf`（ㄅ字嗨注音而已，1.7 MB）—— 這是本 repo 首次提交字型檔
+- 「字元輸入」右側新增 `(□ 純注音)` 勾選框
+- 勾選後中文改用注音字型，並隱藏小格、改為單一大格併排（1 字 1 格）
+- 新增設定項 `bpmfOnly`，一併保存於 localStorage
+- → **不影響既有行為**：未勾選時版型、字型與 v1.1.0 完全相同；既有 localStorage 沒有 `bpmfOnly` 鍵時預設為未勾選
+- → **注意**：純注音模式下每列格數加倍（預設值由每列 6 模組變為 12 格），一頁可容納的字數與一般模式不同
 
 ### v1.1.0 — 2026-07-26
 
@@ -225,6 +281,7 @@ v1.1.0 起，調整「大格子的大小」**不會**再連帶改變頁邊距。
 | 截圖 | [html2canvas 1.4.1](https://cdnjs.com/libraries/html2canvas)（cdnjs） |
 | PDF | [jsPDF 2.5.1 UMD](https://cdnjs.com/libraries/jspdf)（cdnjs） |
 | 版面 | CSS Grid + 負 margin 折疊格線；預覽縮放優先使用 `zoom`，不支援時退回 `transform: scale()` |
+| 內嵌字型 | `BpmfSpecial/BpmfZihiOnly-R.ttf`，以 `@font-face` + `font-display: swap` 載入；純注音模式與版型切換皆由 `.is-bpmf` class 驅動 |
 | 匯出前置 | 等待 `document.fonts.ready`，確保字型載入完成後才截圖 |
 
 ---
@@ -237,9 +294,25 @@ v1.1.0 起，調整「大格子的大小」**不會**再連帶改變頁邊距。
 
 ### 字型
 
-兩套字型皆採 **SIL Open Font License 1.1**，可免費使用（含商用）：
+#### 未散布的字型（僅在 CSS 中引用）
+
+以下兩套皆採 **SIL Open Font License 1.1**，可免費使用（含商用）：
 
 - **隨峰體 The Peak Font** — 作者阿坤，以啫喱筆手寫兩年而成，約 6,100 字。https://cjkfonts.io/blog/ThePeakFont
 - **芫荽 Iansui** — 作者 But Ko，基於 Fontworks 的 Klee One 改作，貼近教育部標準字體寫法的繁體硬筆楷書。https://github.com/ButTaiwan/iansui
 
-本 repo 目前**未散布任何字型檔**，故不涉及 OFL 的隨附授權文件義務。若日後將字型檔提交進 repo，必須一併附上該字型的 `OFL.txt`。依 OFL 規定，禁止單獨出售字型檔。
+隨峰體靠系統安裝、芫荽由 Google Fonts 載入，兩者的字型檔都不在本 repo 中，故不涉及 OFL 的隨附授權文件義務。若日後將它們提交進 repo，必須一併附上該字型的 `OFL.txt`。依 OFL 規定，禁止單獨出售字型檔。
+
+#### 已散布的字型（v1.2.0 起）
+
+- **ㄅ字嗨注音而已 Bpmf Zihi Only** — 作者 But Ko，注音 IVS 字型專案 [bpmfvs](https://github.com/ButTaiwan/bpmfvs) 的產物
+
+字型檔位於 `BpmfSpecial/`，並依原始壓縮檔一併提交了三份授權文件：
+
+| 檔案 | 內容 |
+|---|---|
+| `NOTICE.txt` | bpmfvs 專案的 Apache License 2.0 著作權聲明（涵蓋注音 IVS 規格與產生工具） |
+| `LICENSE-2.0.txt` | Apache License 2.0 全文 |
+| `LICENSE-Gen.txt` | Bpmf Gen* 系列（源樣／源流／源雲／源石／源泉等）的 SIL OFL 1.1 全文 |
+
+> **待確認**：隨附文件中，`LICENSE-Gen.txt` 對應的是 Bpmf **Gen\*** 系列，並未指名 **Zihi** 系列；`NOTICE.txt` 的 Apache 2.0 涵蓋的是專案程式碼與標註用字型，並明載「衍生自此專案所製作之各字型檔，可訂定不同授權條款」。因此 `BpmfZihiOnly-R.ttf` 本身確切適用哪一份授權，在這個壓縮檔內並未單獨列明。目前的作法是原封不動保留三份文件與著作權聲明；若要用於散布以外的用途（尤其是商用），建議先向 [bpmfvs](https://github.com/ButTaiwan/bpmfvs) 或字嗨社群確認。
